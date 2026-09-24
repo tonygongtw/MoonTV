@@ -35,9 +35,14 @@ export function processImageUrl(originalUrl: string): string {
   if (!originalUrl) return originalUrl;
 
   const proxyUrl = getImageProxyUrl();
-  if (!proxyUrl) return originalUrl;
+  if (proxyUrl) return `${proxyUrl}${encodeURIComponent(originalUrl)}`;
 
-  return `${proxyUrl}${encodeURIComponent(originalUrl)}`;
+  // Douban's CDN rejects cross-site browser image requests; use our image endpoint.
+  if (/^https:\/\/img\d+\.doubanio\.com\//.test(originalUrl)) {
+    return `/api/image-proxy?url=${encodeURIComponent(originalUrl)}`;
+  }
+
+  return originalUrl;
 }
 
 export function cleanHtmlTags(text: string): string {
